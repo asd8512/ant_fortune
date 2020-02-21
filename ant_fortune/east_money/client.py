@@ -22,7 +22,7 @@ class FetchFund(object):
         resp = requests.get(**kwargs)
         return resp
 
-    @retry(requests.exceptions.ConnectionError, delay=2)
+    # @retry(requests.exceptions.ConnectionError, delay=2)
     def fund_rank_data(self, start_date, end_date, page_index):
         resp = self._get(url=self.fund_rank_url(start_date=start_date, end_date=end_date, page_index=page_index))
         text = resp.text
