@@ -1,1 +1,1 @@
-kill -HUP `supervisorctl -c /home/sc/etc/supervisord.conf pid ant_fortune`
+kill -HUP `supervisorctl -c /root/etc/supervisord.conf pid ant_fortune`
