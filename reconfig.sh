@@ -1,1 +1,0 @@
-cp ant_fortune/local_settings_prod.py ant_fortune/local_settings.py
