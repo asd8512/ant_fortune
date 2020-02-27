@@ -127,6 +127,7 @@ class FundHistoryViewSet(ModelViewSet):
 
         funds = Fund.objects.values_list("id", "code")
         for fund in funds:
+            history_list = []
             datas = self.client.fetch_fund_history_data(fund_code=fund[1])
             for data in datas:
                 if data[1] == "-":
@@ -135,21 +136,16 @@ class FundHistoryViewSet(ModelViewSet):
                     data[2] = 0.0
                 if data[3] == "-":
                     data[3] = "0.0%"
-                # for i in range(len(data)):
-                #     if data[i] == "-":
-                #         data[i] = 0.0
-                print(data[0])
-                print(data[1])
-                print(data[2])
-                print(data[3])
-                print(fund[0])
-                FundHistory.objects.get_or_create(
-                    transaction_date=data[0],
-                    unit_net_value=data[1],
-                    accumulative_net_value=data[2],
-                    daily_increase_date=data[3].strip("%"),
-                    fund_id=fund[0],
+                history_list.append(
+                    FundHistory(
+                        transaction_date=data[0],
+                        unit_net_value=data[1],
+                        accumulative_net_value=data[2],
+                        daily_increase_date=data[3].strip("%"),
+                        fund_id=fund[0],
+                    )
                 )
+                FundHistory.objects.bulk_create(history_list)
 
         return Response("sync complete.")
 
