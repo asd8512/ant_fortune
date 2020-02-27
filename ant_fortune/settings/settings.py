@@ -127,3 +127,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+BROKER_URL = "redis://192.168.0.200:6379/1"
+
+CELERY_TIMEZONE = "Asia/Shanghai"
+CELERY_RESULT_BACKEND = "redis://192.168.0.200:6379/1"
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://192.168.0.200:6379",
+    },
+}

@@ -1,11 +1,7 @@
 import datetime
 import json
-from decimal import Decimal
 
 import requests
-from retrying import retry
-
-from ant_fortune.east_money.models import Fund, FundHistory
 
 
 class FetchFund(object):
@@ -22,8 +18,7 @@ class FetchFund(object):
         resp = requests.get(**kwargs)
         return resp
 
-    # @retry(requests.exceptions.ConnectionError, delay=2)
-    def fund_rank_data(self, start_date, end_date, page_index):
+    def fetch_fund_rank_data(self, start_date, end_date, page_index):
         resp = self._get(url=self.fund_rank_url(start_date=start_date, end_date=end_date, page_index=page_index))
         text = resp.text
         start, end = self.get_square_bracket_index(text)

@@ -8,6 +8,7 @@ from rest_framework.viewsets import ModelViewSet
 from ant_fortune.east_money.client import FetchFund
 from ant_fortune.east_money.models import FundHistory, Fund
 from ant_fortune.east_money.serializers import HistoryDataSerializer, FundSerializer
+from ant_fortune.east_money.tasks import fund_rank_data, single_fund
 
 
 class FundViewSet(ModelViewSet):
@@ -25,14 +26,6 @@ class FundViewSet(ModelViewSet):
         self.date = datetime.date.today()
         self.client = FetchFund()
 
-    # @action(methods=["get"], detail=False)
-    # def flush_favor_funds(self, request):
-    #     """ 同步自选数据 """
-    #
-    #     self.client.flush_favor_funds()
-    #
-    #     return Response("flush favor complete.")
-
     @action(methods=["get"], detail=False)
     def test(self, request):
         return Response("It's ok.")
@@ -45,13 +38,13 @@ class FundViewSet(ModelViewSet):
         end_date = request.query_params.get("end_date") or self.date
         page_index = request.query_params.get("page_index") or 1
         while True:
-            data = self.client.fund_rank_data(start_date=start_date, end_date=end_date, page_index=int(page_index))
+            data = fund_rank_data(start_date=start_date, end_date=end_date, page_index=int(page_index)).delay()
             if not data:
                 break
             fund_list = []
             for ele in data:
                 i = ele.split(",")
-                fund_type = self.client.fetch_single_fund(fund_code=i[0])[6]
+                fund_type = single_fund(fund_code=i[0]).delay()
                 if i[3] in ["", " ", None]:
                     i[3] = self.date
                 for v in i:
@@ -103,7 +96,7 @@ class FundViewSet(ModelViewSet):
                 Fund.objects.bulk_create(fund_list)
             page_index += 1
 
-        return Response("sync complete.")
+        return Response("syncing.")
 
 
 class FundHistoryViewSet(ModelViewSet):
@@ -152,7 +145,7 @@ class FundHistoryViewSet(ModelViewSet):
                 )
                 FundHistory.objects.bulk_create(history_list)
 
-        return Response("sync complete.")
+        return Response("syncing.")
 
     # @action(methods=["get"], detail=False)
     # def estimate_income(self, request):
