@@ -48,6 +48,7 @@ class FundViewSet(ModelViewSet):
             data = self.client.fund_rank_data(start_date=start_date, end_date=end_date, page_index=int(page_index))
             if not data:
                 break
+            fund_list = []
             for ele in data:
                 i = ele.split(",")
                 fund_type = self.client.fetch_single_fund(fund_code=i[0])[6]
@@ -75,27 +76,31 @@ class FundViewSet(ModelViewSet):
                         since_inception=i[15],
                         establishment_date=i[16],
                     )
-                Fund.objects.create(
-                    code=i[0],
-                    name=i[1],
-                    initials=i[2],
-                    fund_type=fund_type,
-                    modified_date=i[3],
-                    unit_net_value=i[4],
-                    accumulative_net_value=i[5],
-                    daily_increase_date=i[6],
-                    recent_1_week=i[7],
-                    recent_1_month=i[8],
-                    recent_3_month=i[9],
-                    recent_6_month=i[10],
-                    recent_1_year=i[11],
-                    recent_2_year=i[12],
-                    recent_3_year=i[13],
-                    this_year=i[14],
-                    since_inception=i[15],
-                    establishment_date=i[16],
-                    service_fee=i[20].strip("%"),
-                )
+                else:
+                    fund_list.append(
+                        Fund(
+                            code=i[0],
+                            name=i[1],
+                            initials=i[2],
+                            fund_type=fund_type,
+                            modified_date=i[3],
+                            unit_net_value=i[4],
+                            accumulative_net_value=i[5],
+                            daily_increase_date=i[6],
+                            recent_1_week=i[7],
+                            recent_1_month=i[8],
+                            recent_3_month=i[9],
+                            recent_6_month=i[10],
+                            recent_1_year=i[11],
+                            recent_2_year=i[12],
+                            recent_3_year=i[13],
+                            this_year=i[14],
+                            since_inception=i[15],
+                            establishment_date=i[16],
+                            service_fee=i[20].strip("%"),
+                        )
+                    )
+                Fund.objects.bulk_create(fund_list)
             page_index += 1
 
         return Response("sync complete.")
