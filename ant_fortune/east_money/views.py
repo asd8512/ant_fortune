@@ -6,9 +6,14 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from ant_fortune.east_money.client import FetchFund
-from ant_fortune.east_money.models import FundHistory, Fund
-from ant_fortune.east_money.serializers import HistoryDataSerializer, FundSerializer
+from ant_fortune.east_money.models import FundHistory, Fund, Favor, Stock
+from ant_fortune.east_money.serializers import HistoryDataSerializer, FundSerializer, FavorSerializer, StockSerializer
 from ant_fortune.east_money.tasks import fund_rank_data, single_fund
+
+
+class StockViewSet(ModelViewSet):
+    queryset = Stock.objects.all()
+    serializer_class = StockSerializer
 
 
 class FundViewSet(ModelViewSet):
@@ -147,6 +152,11 @@ class FundHistoryViewSet(ModelViewSet):
 
         return Response("syncing.")
 
+    @action(methods=["get"], detail=False)
+    def sync_favor_history(self):
+
+        return Response("syncing.")
+
     # @action(methods=["get"], detail=False)
     # def estimate_income(self, request):
     #     """ 估算盈利 """
@@ -200,3 +210,8 @@ class FundHistoryViewSet(ModelViewSet):
     #             )
     #         history_data.calc_income()
     #     return Response("flush today's data complete.")
+
+
+class FavorViewSet(ModelViewSet):
+    queryset = Favor.objects.all()
+    serializer_class = FavorSerializer

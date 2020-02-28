@@ -1,3 +1,5 @@
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
@@ -93,3 +95,19 @@ class FundHistory(models.Model):
     #     self.save()
     #
     #     return
+
+
+class Favor(models.Model):
+    content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING, null=True)
+    object_id = models.PositiveIntegerField(null=True)
+    content_object = GenericForeignKey("content_type", "object_id")
+
+    name = models.CharField(max_length=255, null=True, blank=True)
+    code = models.CharField(max_length=15, blank=True, default=None)
+
+    modified_date = models.DateField(null=True, default=None)
+    daily_increase_rate = models.DecimalField(max_digits=14, decimal_places=2, default=0)
+
+    class Meta:
+        db_table = "favors"
+        unique_together = ("content_type", "object_id", "code")
