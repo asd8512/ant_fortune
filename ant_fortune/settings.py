@@ -14,14 +14,16 @@ import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = "_&0xdr2qq(cr@)v&l^4ga#ks65b$k_rhpcdp$k(!0*ss_gt=8^"
 
 # SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
@@ -38,9 +40,6 @@ INSTALLED_APPS = [
     'ant_fortune.api',
     'ant_fortune.east_money',
     'rest_framework',
-    'django_filters',
-    'django_mysql',
-    'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -127,6 +126,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = '/opt/var/backend/ant_fortune/static/'
 
 
 BROKER_URL = "redis://192.168.0.200:6379/1"
@@ -140,3 +140,5 @@ CACHES = {
         "LOCATION": "redis://192.168.0.200:6379",
     },
 }
+
+DEBUG = False
