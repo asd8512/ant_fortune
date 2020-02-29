@@ -12,7 +12,7 @@ class Stock(models.Model):
     """ 股票 """
 
     name = models.CharField(max_length=255, blank=True, default=None)  # 股票名称
-    code = models.CharField(max_length=15, blank=True, default=None)  # 股票代码
+    code = models.CharField(max_length=15, blank=True, default=None, unique=True)  # 股票代码
 
     modified_date = models.DateField(null=True, default=None)  # 数据更新日期
     daily_increase_rate = models.DecimalField(max_digits=14, decimal_places=2, default=0)  # 该交易日涨幅
@@ -24,7 +24,7 @@ class Stock(models.Model):
 class Fund(models.Model):
     """ 基金 """
 
-    code = models.CharField(max_length=15, blank=True, default=None)  # 基金代码
+    code = models.CharField(max_length=15, blank=True, default=None, unique=True)  # 基金代码
     name = models.CharField(max_length=255, blank=True, default=None)  # 基金名称
     initials = models.CharField(max_length=31, blank=True, default=None)  # 名称字母
     fund_type = models.CharField(max_length=31, blank=True, default=None)  # 基金类型
@@ -107,6 +107,8 @@ class Favor(models.Model):
 
     modified_date = models.DateField(null=True, default=None)
     daily_increase_rate = models.DecimalField(max_digits=14, decimal_places=2, default=0)
+
+    hold_money = models.DecimalField(max_digits=14, decimal_places=2, default=0)
 
     class Meta:
         db_table = "favors"
