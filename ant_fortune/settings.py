@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = "_&0xdr2qq(cr@)v&l^4ga#ks65b$k_rhpcdp$k(!0*ss_gt=8^"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -140,5 +140,3 @@ CACHES = {
         "LOCATION": "redis://192.168.0.200:6379",
     },
 }
-
-DEBUG = False
