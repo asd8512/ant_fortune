@@ -126,7 +126,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = '/opt/var/backend/ant_fortune/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 
 BROKER_URL = "redis://192.168.0.200:6379/1"
