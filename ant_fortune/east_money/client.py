@@ -85,16 +85,16 @@ class FetchFund(object):
     #
     #     return
 
-    # def fetch_single_data(self, fund_code):
-    #     url = f"http://fundgz.1234567.com.cn/js/{fund_code}.js"
-    #     text = self._get(url=url).text
-    #     start, end = self.get_index(text)
-    #     try:
-    #         data = json.loads(text[start: end])
-    #     except json.decoder.JSONDecodeError:
-    #         data = None
-    #
-    #     return data
+    def fetch_single_data(self, fund_code):
+        url = f"http://fundgz.1234567.com.cn/js/{fund_code}.js"
+        text = self._get(url=url).text
+        start, end = self.get_brace_index(text)
+        try:
+            data = json.loads(text[start: end])
+        except json.decoder.JSONDecodeError:
+            data = None
+
+        return data
 
     # def flush_history_data(self, ):
     #

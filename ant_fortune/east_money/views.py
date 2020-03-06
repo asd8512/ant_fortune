@@ -1,3 +1,4 @@
+from django.contrib.contenttypes.models import ContentType
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import action
@@ -36,6 +37,35 @@ class FundViewSet(ModelViewSet):
         page_index = request.query_params.get("page_index") or 1
         sync_funds_task.delay(start_date=start_date, end_date=end_date, page_index=page_index)
         return Response("syncing...")
+
+    @action(methods=["get"], detail=False)
+    def update_daily_rate(self, request):
+
+        sync_funds_task.delay(start_date=today, end_date=today, page_index=1)
+        self.perform_update_fund()
+        return Response("ok.")
+
+    @action(methods=["get"], detail=False)
+    def update_daily_rate_loop(self, request):
+
+        sync_funds_task.delay(start_date=today, end_date=today, page_index=1)
+
+        while datetime.datetime.now() < datetime.datetime.now().replace(hour=15, minute=20):
+            self.perform_update_fund()
+
+        return Response("ok.")
+
+    def perform_update_fund(self):
+        funds_code = Fund.objects.values_list("code", flat=True)
+        for fund_code in funds_code:
+            data = fund_client.fetch_single_data(fund_code)
+            if not data:
+                continue
+            print(f"---------code: {fund_code}---------")
+            Fund.objects.filter(code=data["fundcode"]).update(
+                modified_date=data["gztime"].split(" ")[0],
+                daily_increase_rate=data["gszzl"]
+            )
 
 
 class FundHistoryViewSet(ModelViewSet):
@@ -85,7 +115,7 @@ class FundHistoryViewSet(ModelViewSet):
                         transaction_date=data[0],
                         unit_net_value=data[1],
                         accumulative_net_value=data[2],
-                        daily_increase_date=data[3].strip("%"),
+                        daily_increase_rate=data[3].strip("%"),
                         fund_id=fund[0],
                     )
                 )
@@ -97,56 +127,30 @@ class FavorViewSet(ModelViewSet):
     queryset = Favor.objects.all()
     serializer_class = FavorSerializer
 
-    # @action(methods=["get"], detail=False)
-    # def estimate_income(self, request):
-    #     """ 估算盈利 """
-    #
-    #     self.flush_today(request=request)
-    #
-    #     funds = Fund.objects.filter(
-    #         is_hold=True,
-    #         hold_money__gt=0,
-    #     )
-    #     history_data = self.queryset.filter(
-    #         fund__in=funds,
-    #         transaction_date=today,
-    #         start_money__gte=0,
-    #         increase_rate__isnull=False,
-    #     )
-    #     income = 0.0
-    #     for data in history_data:
-    #         rate = float(data.increase_rate) / 100
-    #         hold_money = float(data.start_money)
-    #         income += hold_money * rate
-    #
-    #     return Response(income)
-    #
-    # @action(methods=["get"], detail=False)
-    # def flush_today(self, request):
-    #     """ 更新本日交易日数据 """
-    #
-    #     funds = Fund.objects.filter(
-    #         is_hold=True,
-    #         hold_money__gt=0,
-    #     )
-    #     for fund in funds:
-    #         data = fund_client.fetch_single_fund(fund_code=fund.fund_code)
-    #         if data is None:
-    #             continue
-    #         increase_rate = data.get("gszzl")
-    #         history_data = FundHistory.objects.filter(
-    #             fund=fund,
-    #             transaction_date=today,
-    #         ).last()
-    #         if history_data:
-    #             history_data.increase_rate = increase_rate
-    #             history_data.save()
-    #         else:
-    #             history_data = FundHistory.objects.create(
-    #                 fund=fund,
-    #                 transaction_date=today,
-    #                 start_money=fund.hold_money,
-    #                 increase_rate=increase_rate,
-    #             )
-    #         history_data.calc_income()
-    #     return Response("flush today's data complete.")
+    @action(methods=["post"], detail=False)
+    def add(self, request):
+
+        code = request.data.get("code")
+        type_ = request.data.get("type")
+        money = request.data.get("money")
+
+        if code is None:
+            return Response("Invalid code", 400)
+        if type_ is None or (type_.lower() not in ["fund", "stock"]):
+            return Response("Invalid type", 400)
+
+        content_type = ContentType.objects.get(model=type_)
+        try:
+            obj = content_type.get_object_for_this_type(code=code)
+            Favor.create(obj=obj, hold_money=money or 0.0)
+        except (Fund.DoesNotExist, Stock.DoesNotExist):
+            return Response("Wrong params.")
+        return Response("add complete.")
+
+    @action(methods=["get"], detail=False)
+    def estimate_income(self, request):
+        """ 估算盈利 """
+
+        pass
+
+        return Response()

@@ -33,7 +33,7 @@ class Fund(models.Model):
     modified_date = models.DateField(null=True, default=None)  # 数据更新日期
     unit_net_value = models.DecimalField(max_digits=14, decimal_places=2, default=0)  # 单位净值
     accumulative_net_value = models.DecimalField(max_digits=14, decimal_places=2, default=0)  # 累计净值
-    daily_increase_date = models.DecimalField(max_digits=14, decimal_places=2, default=0)  # 日涨幅
+    daily_increase_rate = models.DecimalField(max_digits=14, decimal_places=2, default=0)  # 日涨幅
     recent_1_week = models.DecimalField(max_digits=14, decimal_places=2, default=0.0)  # 近1周
     recent_1_month = models.DecimalField(max_digits=14, decimal_places=2, default=0.0)  # 近1月
     recent_3_month = models.DecimalField(max_digits=14, decimal_places=2, default=0.0)  # 近3月
@@ -75,7 +75,7 @@ class FundHistory(models.Model):
     transaction_date = models.DateField(null=True, default=None)  # 交易日期
     unit_net_value = models.DecimalField(max_digits=14, decimal_places=2, default=0)  # 单位净值
     accumulative_net_value = models.DecimalField(max_digits=14, decimal_places=2, default=0)  # 累计净值
-    daily_increase_date = models.DecimalField(max_digits=14, decimal_places=2, default=0)  # 日涨幅
+    daily_increase_rate = models.DecimalField(max_digits=14, decimal_places=2, default=0)  # 日涨幅
 
     fund = models.ForeignKey(
         Fund,
@@ -102,14 +102,14 @@ class Favor(models.Model):
     object_id = models.PositiveIntegerField(null=True)
     content_object = GenericForeignKey("content_type", "object_id")
 
-    name = models.CharField(max_length=255, null=True, blank=True)
-    code = models.CharField(max_length=15, blank=True, default=None)
-
-    modified_date = models.DateField(null=True, default=None)
-    daily_increase_rate = models.DecimalField(max_digits=14, decimal_places=2, default=0)
-
     hold_money = models.DecimalField(max_digits=14, decimal_places=2, default=0)
 
     class Meta:
         db_table = "favors"
-        unique_together = ("content_type", "object_id", "code")
+        unique_together = ("content_type", "object_id")
+
+    @classmethod
+    def create(cls, obj, **kwargs):
+        ctype = ContentType.objects.get_for_model(obj.__class__)
+        favor = cls.objects.create(content_type=ctype, object_id=obj.id, **kwargs)
+        return favor

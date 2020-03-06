@@ -1,9 +1,7 @@
-import datetime
-
 from celery import shared_task
 
-from ant_fortune.east_money.client import FetchFund
 from ant_fortune.east_money.models import Fund
+from utils.common_data import *
 
 
 @shared_task
@@ -18,7 +16,7 @@ def sync_funds_task(start_date, end_date, page_index):
         for ele in data:
             i = ele.split(",")
             if i[3] in ["", " ", None]:
-                i[3] = datetime.date.today()
+                i[3] = today
             for v in i:
                 if v in ["", " "]:
                     index = i.index(v)
@@ -28,7 +26,7 @@ def sync_funds_task(start_date, end_date, page_index):
                 modified_date=i[3],
                 unit_net_value=i[4],
                 accumulative_net_value=i[5],
-                daily_increase_date=i[6],
+                daily_increase_rate=i[6],
                 recent_1_week=i[7],
                 recent_1_month=i[8],
                 recent_3_month=i[9],
